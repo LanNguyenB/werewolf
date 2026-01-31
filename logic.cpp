@@ -58,38 +58,43 @@ void PrintPlayer(const vector<Player>& pl)	//const for read only
 	}
 }
 
-
+string Checkwin(const vector<Player>& pl)
+{
+	int a=0;
+	int b=0;
+	for(int i=0;i<pl.size();i++)
+	{
+		if(pl[i].role==1 && pl[i+1].alive==true) a++;
+		if(pl[i].role!=1 && pl[i+1].alive==true) b++;
+	}
+	if (a==0)
+	{
+		return "danlangthang";
+	}
+	else
+	{
+		if(a>b||a==b)
+		{
+			return "soithang";
+		}
+		else
+		{
+			return "danlangthang";
+		}
+	}
+}
 int main()
 {
 	vector<Player> pl;
 	Playerinput(pl);
 	PrintPlayer(pl);
+	cout<<"tinh huong win la "<<Checkwin(pl);
+	//While(Checkwin(pl)==0)
+	{
+		//Using for coding the Night and Day
+	};
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
