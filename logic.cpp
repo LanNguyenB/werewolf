@@ -4,6 +4,11 @@
 #include<limits>
 using namespace std;
 
+const int wolf=1;
+const int villager=2;
+const int witch=3;
+const int guard=4;
+
 struct Player
 {
 	string name;
@@ -25,7 +30,7 @@ void Playerinput(vector<Player>& pl)	//pl is the name of the vector, the list
 		p.alive=true;
 		pl.push_back(p);
 	}
-	cout<<"//wolf press 1\n"<<"villager press 2\n"<<"witch press 3\n"<<"guard press 4//\n";
+	cout<<"//wolf press 1\n"<<"villager press 2\n"<<"witch press 3\n"<<"guard press 4//\n\n";
 	for(int i=0;i<n;i++)
 	{
 		Player p;
@@ -62,10 +67,10 @@ string Checkwin(const vector<Player>& pl)
 {
 	int a=0;
 	int b=0;
-	for(int i=0;i<pl.size();i++)
+	for(int i=0;i<(int)pl.size();i++)
 	{
-		if(pl[i].role==1 && pl[i+1].alive==true) a++;
-		if(pl[i].role!=1 && pl[i+1].alive==true) b++;
+		if(pl[i].role==1 && pl[i].alive==true) a++;
+		if(pl[i].role!=1 && pl[i].alive==true) b++;
 	}
 	if (a==0)
 	{
@@ -83,16 +88,118 @@ string Checkwin(const vector<Player>& pl)
 		}
 	}
 }
+
+struct Rolesum
+{
+	int wolf=0;
+	int villager=0;
+	int witch=0;
+	int guard=0;
+};
+
+Rolesum count(const vector<Player>& pl)
+{
+	Rolesum s;
+	for(int i=0;i<(int)pl.size();i++)
+	{
+		switch(pl[i].role)
+		{
+			case wolf: s.wolf ++; break;
+			case villager: s.villager ++; break;
+			case witch: s.witch ++; break;
+			case guard: s.guard ++; break;
+		}
+	}
+	return s;
+}
+
+vector<int> listalive(const vector<Player>& pl, int roleCode)
+{
+	vector<int> idx;
+	for(int i=0;i<(int)pl.size();i++)
+	{
+		if(pl[i].alive && pl[i].role == roleCode)
+		{
+			idx.push_back(i);
+		}
+	}
+	return idx;
+}
+
+bool checkalive(const vector<Player>& pl, int roleCode)
+{
+	return !listalive(pl,roleCode).empty();
+}
+
+struct Nightstate
+{
+	int wolfTarget=-1;
+	int guardTarget=-1;
+	bool witchSave= false;
+};
+
+int choosealive(const vector<Player>& pl, const string& prompt)
+{
+	while(true)
+	{
+		cout<<endl<<prompt<<endl;
+		for(int i=0;i<(int)pl.size();i++)
+		{
+			if(pl[i].alive)
+			{
+				cout<<i+1<<". "<<pl[i].name<<endl;
+			}
+		}
+		cout<<"choose number :";
+		int pick;
+		cin>>pick;
+		int idx= pick-1;
+		if( idx>=0 && idx<(int)pl.size() && pl[idx].alive)
+		{
+			return idx;
+		}
+		"invalid choice, try again";
+	}
+}
+
+Nightstate Nightphase(const vector<Player>& pl)
+{
+	Nightstate st;
+	if(checkalive(pl,wolf))
+	{
+		do
+    	{
+       		st.wolfTarget=choosealive(pl, "Wolf: choose someone to kill");
+    		if(pl[st.wolfTarget].role==wolf)
+            cout<<"Invalid: wolf cannot kill wolf. Choose again.\n";
+   		}
+    	while (pl[st.wolfTarget].role == wolf);
+	}
+	return st;
+}
+
+void NightResult(vector<Player>& pl, const Nightstate& st)
+{
+    if(st.wolfTarget!=-1)
+    {
+        pl[st.wolfTarget].alive=false;
+    }
+}
+
 int main()
 {
 	vector<Player> pl;
 	Playerinput(pl);
+	Nightstate st = Nightphase(pl);
+	cout << "\nWolf target index: " << st.wolfTarget << "\n";
+	if(st.wolfTarget != -1) cout << "Wolf chose: " << pl[st.wolfTarget].name << "\n";
+
+	NightResult(pl, st);
+	cout << "\nSo wolf con song: " << listalive(pl, wolf).size()<<endl;
+ 	
 	PrintPlayer(pl);
 	cout<<"tinh huong win la "<<Checkwin(pl);
-	//While(Checkwin(pl)==0)
-	{
-		//Using for coding the Night and Day
-	};
+
 }
 
 
